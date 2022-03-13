@@ -30,6 +30,7 @@ sp-offchain = {  default-features = false, git = 'https://github.com/paritytech/
 sp-core = {  default-features = false, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
 sp-std = {  default-features = false, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
 sp-api = {  default-features = false, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
+sp-io = {  default-features = false, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
 sp-runtime = {  default-features = false, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
 sp-staking = { default-features = false, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
 sp-keyring = {  optional = true, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
@@ -39,6 +40,7 @@ sp-version = {  default-features = false, git = 'https://github.com/paritytech/s
 sp-npos-elections = {  default-features = false, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
 
 # frame dependencies
+frame-election-provider-support = {  default-features = false, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
 frame-executive = {  default-features = false, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
 frame-benchmarking = { default-features = false, optional = true, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
 frame-support = {  default-features = false, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
@@ -50,6 +52,7 @@ pallet-assets = {  default-features = false, git = 'https://github.com/paritytec
 pallet-authority-discovery = {  default-features = false, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
 pallet-authorship = {  default-features = false, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
 pallet-babe = {  default-features = false, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
+pallet-bags-list = {  default-features = false, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
 pallet-balances = {  default-features = false, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
 pallet-bounties = {  default-features = false, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
 pallet-collective = {  default-features = false, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
@@ -87,6 +90,7 @@ pallet-utility = {  default-features = false, git = 'https://github.com/parityte
 pallet-transaction-payment = {  default-features = false, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
 pallet-transaction-payment-rpc-runtime-api = {  default-features = false, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
 pallet-vesting = {  default-features = false, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
+pallet-preimage = {  default-features = false, git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.17' }
 
 # local dependencies
 pallet-template = {default-features = false, version = '4.0.0-dev', path = '../../pallets/template'}
@@ -129,6 +133,7 @@ std = [
 	"pallet-multisig/std",
 	"pallet-identity/std",
 	"pallet-scheduler/std",
+	"pallet-bags-list/std",
 	"node-primitives/std",
 	"sp-offchain/std",
 	"pallet-offences/std",
@@ -144,6 +149,7 @@ std = [
 	"sp-keyring",
 	"sp-session/std",
 	"pallet-sudo/std",
+	"frame-election-provider-support/std",
 	"frame-support/std",
 	"frame-benchmarking/std",
 	"frame-system-rpc-runtime-api/std",
@@ -157,6 +163,7 @@ std = [
 	"sp-transaction-pool/std",
 	"pallet-utility/std",
 	"sp-version/std",
+	"pallet-preimage/std",
 	"pallet-society/std",
 	"pallet-recovery/std",
 	"pallet-vesting/std",

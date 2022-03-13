@@ -4382,6 +4382,7 @@ name = "node_runtime"
 version = "2.0.1"
 dependencies = [
  "frame-benchmarking",
+ "frame-election-provider-support",
  "frame-executive",
  "frame-support",
  "frame-system",
@@ -4395,6 +4396,7 @@ dependencies = [
  "pallet-authority-discovery",
  "pallet-authorship",
  "pallet-babe",
+ "pallet-bags-list",
  "pallet-balances",
  "pallet-bounties",
  "pallet-collective",
@@ -4415,6 +4417,7 @@ dependencies = [
  "pallet-multisig",
  "pallet-offences",
  "pallet-offences-benchmarking",
+ "pallet-preimage",
  "pallet-proxy",
  "pallet-randomness-collective-flip",
  "pallet-recovery",

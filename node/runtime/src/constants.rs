@@ -20,10 +20,12 @@
 /// Money matters.
 pub mod currency {
 	use node_primitives::Balance;
-
+	pub const EXISTENTIAL_DEPOSIT: Balance = 1 * CENTS;
+	pub const UNITS: Balance = 1_000_000_000_000;
 	pub const MILLICENTS: Balance = 1_000_000_000;
 	pub const CENTS: Balance = 1_000 * MILLICENTS;    // assume this is worth about a cent.
 	pub const DOLLARS: Balance = 100 * CENTS;
+	pub const GRAND: Balance = CENTS * 100_000;
 
 	pub const fn deposit(items: u32, bytes: u32) -> Balance {
 		items as Balance * 15 * CENTS + (bytes as Balance) * 6 * CENTS
@@ -61,7 +63,7 @@ pub mod time {
 	// 1 in 4 blocks (on average, not counting collisions) will be primary BABE blocks.
 	pub const PRIMARY_PROBABILITY: (u64, u64) = (1, 4);
 
-	// NOTE: Currently it is not possible to change the epoch duration after the chain has started.
+// NOTE: Currently it is not possible to change the epoch duration after the chain has started.
 	//       Attempting to do so will brick block production.
 	pub const EPOCH_DURATION_IN_BLOCKS: BlockNumber = 10 * MINUTES;
 	pub const EPOCH_DURATION_IN_SLOTS: u64 = {

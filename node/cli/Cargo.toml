@@ -153,6 +153,7 @@ browser = [
 	"libp2p-wasm-ext",
 ]
 cli = [
+	"clap",
 	"node-executor/wasmi-errno",
 	"node-inspect",
 	"sc-cli",
