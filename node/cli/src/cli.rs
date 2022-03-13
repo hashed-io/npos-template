@@ -16,32 +16,31 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-use sc_cli::{RunCmd, KeySubcommand, SignCmd, VanityCmd, VerifyCmd};
-use structopt::StructOpt;
+use sc_cli::{RunCmd, KeySubcommand};
+use clap::Parser;
 
 /// An overarching CLI command definition.
-#[derive(Debug, StructOpt)]
+#[allow(missing_docs)]
+#[derive(Debug, Parser)]
 pub struct Cli {
-	/// Possible subcommand with parameters.
-	#[structopt(subcommand)]
+	#[clap(subcommand)]
 	pub subcommand: Option<Subcommand>,
-	#[allow(missing_docs)]
-	#[structopt(flatten)]
+	#[clap(flatten)]
 	pub run: RunCmd,
 }
 
 /// Possible subcommands of the main binary.
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Parser)]
 pub enum Subcommand {
 	/// Key management cli utilities
 	Key(KeySubcommand),
 
-	/// The custom inspect subcommmand for decoding blocks and extrinsics.
-	#[structopt(
-		name = "inspect",
-		about = "Decode given block or extrinsic using current native runtime."
-	)]
-	Inspect(node_inspect::cli::InspectCmd),
+	// /// The custom inspect subcommmand for decoding blocks and extrinsics.
+	// #[structopt(
+	// 	name = "inspect",
+	// 	about = "Decode given block or extrinsic using current native runtime."
+	// )]
+	// Inspect(node_inspect::cli::InspectCmd),
 
 	/// The custom benchmark subcommmand benchmarking runtime pallets.
 	#[structopt(name = "benchmark", about = "Benchmark runtime pallets.")]
@@ -52,14 +51,14 @@ pub enum Subcommand {
 	#[cfg(feature = "try-runtime")]
 	TryRuntime(try_runtime_cli::TryRuntimeCmd),
 
-	/// Verify a signature for a message, provided on STDIN, with a given (public or secret) key.
-	Verify(VerifyCmd),
+	// /// Verify a signature for a message, provided on STDIN, with a given (public or secret) key.
+	// Verify(VerifyCmd),
 
-	/// Generate a seed that provides a vanity address.
-	Vanity(VanityCmd),
+	// /// Generate a seed that provides a vanity address.
+	// Vanity(VanityCmd),
 
-	/// Sign a message, with a given (secret) key.
-	Sign(SignCmd),
+	// /// Sign a message, with a given (secret) key.
+	// Sign(SignCmd),
 
 	/// Build a chain specification.
 	BuildSpec(sc_cli::BuildSpecCmd),

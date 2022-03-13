@@ -1,0 +1,16 @@
+
+**/target/
+**/*.rs.bk
+*.swp
+.wasm-binaries
+runtime/wasm/target/
+**/._*
+.idea
+.vscode
+polkadot.*
+!polkadot.service
+!.rpm/*
+.DS_Store
+.cargo
+.env
+data
