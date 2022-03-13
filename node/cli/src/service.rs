@@ -169,7 +169,7 @@ pub fn new_partial(
 				},
 			};
 
-			node_rpc::create_full(deps)
+			create::rpc::create_full(deps)
 		};
 
 		(rpc_extensions_builder, rpc_setup)
