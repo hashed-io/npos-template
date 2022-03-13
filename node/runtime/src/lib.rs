@@ -33,7 +33,7 @@ use frame_support::{
 	},
 	traits::{
 		Contains, Currency, Imbalance, KeyOwnerProofSystem, OnUnbalanced, LockIdentifier,
-		U128CurrencyToVote, Randomness, PrivilegeCmp, ConstU32, ConstU128,
+		U128CurrencyToVote, PrivilegeCmp, ConstU32, ConstU128,
 	},
 };
 use frame_system::{
@@ -216,10 +216,8 @@ impl Contains<Call> for BaseFilter {
 			Call::Democracy(_) |
 			Call::Contracts(_) |
 			Call::Sudo(_) |
-			Call::Soceity(_) |
+			Call::Society(_) |
 			Call::Authorship(_) |
-			Call::TransactionPayment(_) |
-			Call::AuthorityDiscovery(_) |
 			Call::Council(_) |
 			Call::TechnicalCommittee(_) |
 			Call::TechnicalMembership(_) |
@@ -232,7 +230,6 @@ impl Contains<Call> for BaseFilter {
 			Call::Babe(_) |
 			Call::Timestamp(_) |
 			Call::Balances(_) |
-			Call::Authorship(_) |
 			Call::Staking(_) |
 			Call::Session(_) |
 			Call::Grandpa(_) |
@@ -240,11 +237,16 @@ impl Contains<Call> for BaseFilter {
 			Call::Utility(_) |
 			// Call::Claims(_) |
 			Call::Vesting(_) |
+			Call::TemplateModule(_) |
 			Call::Identity(_) |
 			Call::Proxy(_) |
 			Call::Multisig(_) |
 			Call::Bounties(_) |
 			Call::Tips(_) |
+			Call::Recovery(_) |
+			Call::Assets(_) |
+			Call::Gilt(_) |
+			Call::Lottery(_) |
 			Call::BagsList(_) |
 			Call::ElectionProviderMultiPhase(_) => true,
 			// All pallets are allowed, but exhaustive match is defensive
@@ -724,7 +726,7 @@ impl frame_support::pallet_prelude::Get<Option<(usize, sp_npos_elections::Extend
 	for OffchainRandomBalancing
 {
 	fn get() -> Option<(usize, sp_npos_elections::ExtendedBalance)> {
-		use sp_runtime::{codec::Decode, traits::TrailingZeroInput};
+		use sp_runtime::traits::TrailingZeroInput;
 		let iters = match MINER_MAX_ITERATIONS {
 			0 => 0,
 			max @ _ => {
@@ -1381,7 +1383,7 @@ construct_runtime!(
 		ElectionProviderMultiPhase: pallet_election_provider_multi_phase::{Pallet, Call, Storage, Event<T>, ValidateUnsigned},
 		Staking: pallet_staking::{Pallet, Call, Config<T>, Storage, Event<T>},
 		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
-		Democracy: pallet_democracy::{Pallet, Call, Storage, Config, Event<T>},
+		Democracy: pallet_democracy::{Pallet, Call, Storage, Config<T>, Event<T>},
 		Council: pallet_collective::<Instance1>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
 		TechnicalCommittee: pallet_collective::<Instance2>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
 		Elections: pallet_elections_phragmen::{Pallet, Call, Storage, Event<T>, Config<T>},
