@@ -1,26 +1,23 @@
 use node_runtime::{
-	AccountId, GenesisConfig, Signature,AuthorityDiscoveryConfig, BabeConfig,
-	BalancesConfig, Block, CouncilConfig, DemocracyConfig, ElectionsConfig, GrandpaConfig,
+	GenesisConfig, Signature,AuthorityDiscoveryConfig, BabeConfig,
+	BalancesConfig, CouncilConfig, DemocracyConfig, ElectionsConfig, GrandpaConfig,
 	ImOnlineConfig, IndicesConfig, MaxNominations, SessionConfig, SessionKeys, SocietyConfig,
 	StakerStatus, StakingConfig, SudoConfig, TechnicalCommitteeConfig,
 	SystemConfig, WASM_BINARY, constants::currency::*,
 };
-use node_primitives::{AccountId, Balance, Block, BlockNumber, Hash, Index};
+use node_primitives::{AccountId, Balance};
 use sc_service::ChainType;
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::{
 	traits::{IdentifyAccount, Verify},
 	Perbill,
 };
-use hex_literal::hex;
+// use hex_literal::hex;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
-use sc_chain_spec::ChainSpecExtension;
-use sc_telemetry::TelemetryEndpoints;
-use serde::{Deserialize, Serialize};
+// use sc_telemetry::TelemetryEndpoints;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;
-use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
-use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
+use sp_core::{sr25519, Pair, Public};
 
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
@@ -85,20 +82,14 @@ pub fn development_config() -> Result<ChainSpec, String> {
 		move || {
 			testnet_genesis(
 				wasm_binary,
-				// Initial PoA authorities
+				// Initial authorities
 				vec![authority_keys_from_seed("Alice")],
 				// Initial nominators
 				vec![],
 				// Sudo account
 				get_account_id_from_seed::<sr25519::Public>("Alice"),
 				// Pre-funded accounts
-				vec![
-					get_account_id_from_seed::<sr25519::Public>("Alice"),
-					get_account_id_from_seed::<sr25519::Public>("Bob"),
-					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-				],
-				true,
+				None,
 			)
 		},
 		// Bootnodes
@@ -134,21 +125,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 				// Sudo account
 				get_account_id_from_seed::<sr25519::Public>("Alice"),
 				// Pre-funded accounts
-				vec![
-					get_account_id_from_seed::<sr25519::Public>("Alice"),
-					get_account_id_from_seed::<sr25519::Public>("Bob"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie"),
-					get_account_id_from_seed::<sr25519::Public>("Dave"),
-					get_account_id_from_seed::<sr25519::Public>("Eve"),
-					get_account_id_from_seed::<sr25519::Public>("Ferdie"),
-					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
-				],
-				true,
+				None,
 			)
 		},
 		// Bootnodes
@@ -295,9 +272,9 @@ pub fn testnet_genesis(
 			max_members: 999,
 		},
 		vesting: Default::default(),
-		assets: Default::default(),
+		// assets: Default::default(),
 		gilt: Default::default(),
-		transaction_storage: Default::default(),
-		transaction_payment: Default::default(),
+		// transaction_storage: Default::default(),
+		// transaction_payment: Default::default(),
 	}
 }

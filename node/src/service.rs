@@ -10,7 +10,7 @@ use sc_service::{config::Configuration, error::Error as ServiceError, RpcHandler
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use std::{sync::Arc, time::Duration};
 use sc_network::{Event, NetworkService};
-use sp_runtime::{generic, traits::Block as BlockT, SaturatedConversion};
+use sp_runtime::{traits::Block as BlockT};
 
 // Our native executor instance.
 pub struct ExecutorDispatch;
@@ -45,24 +45,29 @@ pub type TransactionPool = sc_transaction_pool::FullPool<Block, FullClient>;
 
 pub fn new_partial(
 	config: &Configuration,
-) -> Result<sc_service::PartialComponents<
-	FullClient, FullBackend, FullSelectChain,
-	sc_consensus::DefaultImportQueue<Block, FullClient>,
-	sc_transaction_pool::FullPool<Block, FullClient>,
-	(
-		impl Fn(
-			crate::rpc::DenyUnsafe,
-			sc_rpc::SubscriptionTaskExecutor,
-		) -> crate::rpc::IoHandler,
+) -> Result<
+	sc_service::PartialComponents<
+		FullClient, 
+		FullBackend, 
+		FullSelectChain,
+		sc_consensus::DefaultImportQueue<Block, FullClient>,
+		sc_transaction_pool::FullPool<Block, FullClient>,
 		(
-			sc_consensus_babe::BabeBlockImport<Block, FullClient, FullGrandpaBlockImport>,
-			sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
-			sc_consensus_babe::BabeLink<Block>,
+			impl Fn(
+				crate::rpc::DenyUnsafe,
+				sc_rpc::SubscriptionTaskExecutor,
+			) -> crate::rpc::IoHandler,
+			(
+				sc_consensus_babe::BabeBlockImport<Block, FullClient, FullGrandpaBlockImport>,
+				sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
+				sc_consensus_babe::BabeLink<Block>,
+			),
+			sc_finality_grandpa::SharedVoterState,
+			Option<Telemetry>,
 		),
-		sc_finality_grandpa::SharedVoterState,
-		Option<Telemetry>,
-	)
->, ServiceError> {
+	>, 
+	ServiceError
+> {
 	if config.keystore_remote.is_some() {
 		return Err(ServiceError::Other("Remote Keystores are not supported.".into()))
 	}
@@ -135,7 +140,7 @@ pub fn new_partial(
 			let timestamp = sp_timestamp::InherentDataProvider::from_system_time();
 
 			let slot =
-				sp_consensus_babe::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
+				sp_consensus_babe::inherents::InherentDataProvider::from_timestamp_and_duration(
 					*timestamp,
 					slot_duration,
 				);
@@ -268,7 +273,7 @@ pub fn new_full_base(
 		.push(sc_finality_grandpa::grandpa_peers_set_config(grandpa_protocol_name.clone()));
 	let warp_sync = Arc::new(sc_finality_grandpa::warp_proof::NetworkProvider::new(
 		backend.clone(),
-		grandpa_link.shared_authority_set().clone(),
+		import_setup.1.shared_authority_set().clone(),
 		Vec::default(),
 	));
 
@@ -350,7 +355,7 @@ pub fn new_full_base(
 					let timestamp = sp_timestamp::InherentDataProvider::from_system_time();
 
 					let slot =
-						sp_consensus_babe::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
+						sp_consensus_babe::inherents::InherentDataProvider::from_timestamp_and_duration(
 							*timestamp,
 							slot_duration,
 						);
@@ -403,7 +408,7 @@ pub fn new_full_base(
 			prometheus_registry.clone(),
 		);
 
-		task_manager.spawn_handle().spawn("authority-discovery-worker", authority_discovery_worker.run());
+		task_manager.spawn_handle().spawn("authority-discovery-worker", None, authority_discovery_worker.run());
 	}
 
 	// if the node isn't actively participating in consensus then it doesn't

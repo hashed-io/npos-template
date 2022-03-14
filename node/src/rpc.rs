@@ -16,7 +16,7 @@ use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
 use sc_client_api::AuxStore;
 use sc_consensus_babe::{Config, Epoch};
 use sc_consensus_babe_rpc::BabeRpcHandler;
-use sc_finality_grandpa_rpc::{GrandpaRpcHandler, GrandpaApi};
+use sc_finality_grandpa_rpc::{GrandpaRpcHandler};
 use sc_rpc::SubscriptionTaskExecutor;
 use sc_consensus_epochs::SharedEpochChanges;
 use sc_finality_grandpa::{
@@ -141,6 +141,7 @@ where
 			client,
 			shared_authority_set,
 			shared_epoch_changes,
+			deny_unsafe,
 		)?,
 	));
 
