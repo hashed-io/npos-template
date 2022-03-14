@@ -1,6 +1,6 @@
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
-use node_runtime::{self, opaque::Block, RuntimeApi};
+use node_runtime::{self, Block, RuntimeApi};
 use sc_client_api::{BlockBackend, ExecutorProvider};
 use sc_executor::NativeElseWasmExecutor;
 use sc_finality_grandpa::SharedVoterState;
@@ -10,7 +10,7 @@ use sc_service::{config::Configuration, error::Error as ServiceError, RpcHandler
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use std::{sync::Arc, time::Duration};
 use sc_network::{Event, NetworkService};
-use std::sync::Arc;
+use sp_runtime::{generic, traits::Block as BlockT, SaturatedConversion};
 
 // Our native executor instance.
 pub struct ExecutorDispatch;
@@ -39,23 +39,27 @@ type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 type FullGrandpaBlockImport =
 	sc_finality_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>;
 
+/// The transaction pool type defintion.
+pub type TransactionPool = sc_transaction_pool::FullPool<Block, FullClient>;
+
+
 pub fn new_partial(
 	config: &Configuration,
 ) -> Result<sc_service::PartialComponents<
 	FullClient, FullBackend, FullSelectChain,
-	sp_consensus::DefaultImportQueue<Block, FullClient>,
+	sc_consensus::DefaultImportQueue<Block, FullClient>,
 	sc_transaction_pool::FullPool<Block, FullClient>,
 	(
 		impl Fn(
-			node_rpc::DenyUnsafe,
+			crate::rpc::DenyUnsafe,
 			sc_rpc::SubscriptionTaskExecutor,
-		) -> node_rpc::IoHandler,
+		) -> crate::rpc::IoHandler,
 		(
 			sc_consensus_babe::BabeBlockImport<Block, FullClient, FullGrandpaBlockImport>,
-			grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
+			sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
 			sc_consensus_babe::BabeLink<Block>,
 		),
-		grandpa::SharedVoterState,
+		sc_finality_grandpa::SharedVoterState,
 		Option<Telemetry>,
 	)
 >, ServiceError> {
@@ -111,6 +115,14 @@ pub fn new_partial(
 		telemetry.as_ref().map(|x| x.handle()),
 	)?;
 
+	let justification_import = grandpa_block_import.clone();
+
+	let (block_import, babe_link) = sc_consensus_babe::block_import(
+		sc_consensus_babe::Config::get(&*client)?,
+		grandpa_block_import,
+		client.clone(),
+	)?;
+
 	let slot_duration = babe_link.config().slot_duration();
 
 	let import_queue = sc_consensus_babe::import_queue(
@@ -146,10 +158,10 @@ pub fn new_partial(
 
 		let justification_stream = grandpa_link.justification_stream();
 		let shared_authority_set = grandpa_link.shared_authority_set().clone();
-		let shared_voter_state = grandpa::SharedVoterState::empty();
+		let shared_voter_state = sc_finality_grandpa::SharedVoterState::empty();
 		let rpc_setup = shared_voter_state.clone();
 
-		let finality_proof_provider = grandpa::FinalityProofProvider::new_for_service(
+		let finality_proof_provider = sc_finality_grandpa::FinalityProofProvider::new_for_service(
 			backend.clone(),
 			Some(shared_authority_set.clone()),
 		);
@@ -288,7 +300,7 @@ pub fn new_full_base(
 	let enable_grandpa = !config.disable_grandpa;
 	let prometheus_registry = config.prometheus_registry().cloned();
 
-	let _rpc_handlers = sc_service::spawn_tasks(sc_service::SpawnTasksParams {
+	let rpc_handlers = sc_service::spawn_tasks(sc_service::SpawnTasksParams {
 		network: network.clone(),
 		client: client.clone(),
 		keystore: keystore_container.sync_keystore(),

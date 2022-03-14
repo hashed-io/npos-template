@@ -1,23 +1,26 @@
 use node_runtime::{
-	AccountId, Balance, GenesisConfig, Signature,AuthorityDiscoveryConfig, BabeConfig,
+	AccountId, GenesisConfig, Signature,AuthorityDiscoveryConfig, BabeConfig,
 	BalancesConfig, Block, CouncilConfig, DemocracyConfig, ElectionsConfig, GrandpaConfig,
 	ImOnlineConfig, IndicesConfig, MaxNominations, SessionConfig, SessionKeys, SocietyConfig,
-	StakerStatus, StakingConfig, SudoConfig, SystemConfig, TechnicalCommitteeConfig,
+	StakerStatus, StakingConfig, SudoConfig, TechnicalCommitteeConfig,
 	SystemConfig, WASM_BINARY, constants::currency::*,
 };
+use node_primitives::{AccountId, Balance, Block, BlockNumber, Hash, Index};
 use sc_service::ChainType;
-use sp_core::{sr25519, Pair, Public};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
-use sp_runtime::traits::{IdentifyAccount, Verify}, Perbill;
+use sp_runtime::{
+	traits::{IdentifyAccount, Verify},
+	Perbill,
+};
 use hex_literal::hex;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_chain_spec::ChainSpecExtension;
-use sc_service::ChainType;
 use sc_telemetry::TelemetryEndpoints;
 use serde::{Deserialize, Serialize};
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
+use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
@@ -229,7 +232,7 @@ pub fn testnet_genesis(
 	const STASH: Balance = ENDOWMENT / 1000;
 
 	GenesisConfig {
-		system: SystemConfig { code: wasm_binary_unwrap().to_vec() },
+		system: SystemConfig { code: wasm_binary.to_vec() },
 		balances: BalancesConfig {
 			balances: endowed_accounts.iter().cloned().map(|x| (x, ENDOWMENT)).collect(),
 		},

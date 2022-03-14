@@ -7,7 +7,7 @@
 
 use std::sync::Arc;
 
-use node_runtime::{opaque::Block, AccountId, Balance, Index};
+use node_primitives::{Block, BlockNumber, AccountId, Balance, Index, Hash};
 pub use sc_rpc_api::DenyUnsafe;
 use sc_transaction_pool_api::TransactionPool;
 use sp_api::ProvideRuntimeApi;
@@ -16,10 +16,16 @@ use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
 use sc_client_api::AuxStore;
 use sc_consensus_babe::{Config, Epoch};
 use sc_consensus_babe_rpc::BabeRpcHandler;
+use sc_finality_grandpa_rpc::{GrandpaRpcHandler, GrandpaApi};
+use sc_rpc::SubscriptionTaskExecutor;
 use sc_consensus_epochs::SharedEpochChanges;
 use sc_finality_grandpa::{
 	FinalityProofProvider, GrandpaJustificationStream, SharedAuthoritySet, SharedVoterState,
 };
+use sp_consensus_babe::BabeApi;
+use sp_keystore::SyncCryptoStorePtr;
+use sp_consensus::SelectChain;
+
 
 /// Extra dependencies for BABE.
 pub struct BabeDeps {
