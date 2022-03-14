@@ -4,8 +4,7 @@ panic = "unwind"
 
 [workspace]
 members = [
-	"node/cli",
-	"node/executor",
-	"node/runtime",
-	"pallets/*",
+	"node",
+	"runtime",
+	"pallets/template",
 ]
