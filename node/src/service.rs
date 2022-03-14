@@ -3,7 +3,6 @@
 use node_runtime::{self, Block, RuntimeApi};
 use sc_client_api::{BlockBackend, ExecutorProvider};
 use sc_executor::NativeElseWasmExecutor;
-use sc_finality_grandpa::SharedVoterState;
 use sc_keystore::LocalKeystore;
 use sc_consensus_babe::{self, SlotProportion};
 use sc_service::{config::Configuration, error::Error as ServiceError, RpcHandlers, TaskManager};
@@ -42,13 +41,13 @@ type FullGrandpaBlockImport =
 /// The transaction pool type defintion.
 pub type TransactionPool = sc_transaction_pool::FullPool<Block, FullClient>;
 
-
+/// Creates a new partial node.
 pub fn new_partial(
 	config: &Configuration,
 ) -> Result<
 	sc_service::PartialComponents<
-		FullClient, 
-		FullBackend, 
+		FullClient,
+		FullBackend,
 		FullSelectChain,
 		sc_consensus::DefaultImportQueue<Block, FullClient>,
 		sc_transaction_pool::FullPool<Block, FullClient>,
@@ -56,7 +55,7 @@ pub fn new_partial(
 			impl Fn(
 				crate::rpc::DenyUnsafe,
 				sc_rpc::SubscriptionTaskExecutor,
-			) -> crate::rpc::IoHandler,
+			) -> Result<crate::rpc::IoHandler, sc_service::Error>,
 			(
 				sc_consensus_babe::BabeBlockImport<Block, FullClient, FullGrandpaBlockImport>,
 				sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
@@ -65,13 +64,9 @@ pub fn new_partial(
 			sc_finality_grandpa::SharedVoterState,
 			Option<Telemetry>,
 		),
-	>, 
-	ServiceError
+	>,
+	ServiceError,
 > {
-	if config.keystore_remote.is_some() {
-		return Err(ServiceError::Other("Remote Keystores are not supported.".into()))
-	}
-
 	let telemetry = config
 		.telemetry_endpoints
 		.clone()
@@ -92,7 +87,7 @@ pub fn new_partial(
 
 	let (client, backend, keystore_container, task_manager) =
 		sc_service::new_full_parts::<Block, RuntimeApi, _>(
-			&config,
+			config,
 			telemetry.as_ref().map(|(_, telemetry)| telemetry.handle()),
 			executor,
 		)?;
@@ -119,7 +114,6 @@ pub fn new_partial(
 		select_chain.clone(),
 		telemetry.as_ref().map(|x| x.handle()),
 	)?;
-
 	let justification_import = grandpa_block_import.clone();
 
 	let (block_import, babe_link) = sc_consensus_babe::block_import(
@@ -129,7 +123,6 @@ pub fn new_partial(
 	)?;
 
 	let slot_duration = babe_link.config().slot_duration();
-
 	let import_queue = sc_consensus_babe::import_queue(
 		babe_link.clone(),
 		block_import.clone(),
@@ -140,7 +133,7 @@ pub fn new_partial(
 			let timestamp = sp_timestamp::InherentDataProvider::from_system_time();
 
 			let slot =
-				sp_consensus_babe::inherents::InherentDataProvider::from_timestamp_and_duration(
+				sp_consensus_babe::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
 					*timestamp,
 					slot_duration,
 				);
@@ -211,13 +204,14 @@ pub fn new_partial(
 		client,
 		backend,
 		task_manager,
-		import_queue,
 		keystore_container,
 		select_chain,
+		import_queue,
 		transaction_pool,
 		other: (rpc_extensions_builder, import_setup, rpc_setup, telemetry),
 	})
 }
+
 
 /// Result of [`new_full_base`].
 pub struct NewFullBase {
@@ -306,15 +300,15 @@ pub fn new_full_base(
 	let prometheus_registry = config.prometheus_registry().cloned();
 
 	let rpc_handlers = sc_service::spawn_tasks(sc_service::SpawnTasksParams {
-		network: network.clone(),
+		config,
+		backend,
 		client: client.clone(),
 		keystore: keystore_container.sync_keystore(),
-		task_manager: &mut task_manager,
-		transaction_pool: transaction_pool.clone(),
+		network: network.clone(),
 		rpc_extensions_builder: Box::new(rpc_extensions_builder),
-		backend,
+		transaction_pool: transaction_pool.clone(),
+		task_manager: &mut task_manager,
 		system_rpc_tx,
-		config,
 		telemetry: telemetry.as_mut(),
 	})?;
 
@@ -416,7 +410,7 @@ pub fn new_full_base(
 	let keystore =
 		if role.is_authority() { Some(keystore_container.sync_keystore()) } else { None };
 
-	let grandpa_config = sc_finality_grandpa::Config {
+	let config = sc_finality_grandpa::Config {
 		// FIXME #1578 make this available through chainspec
 		gossip_duration: Duration::from_millis(333),
 		justification_period: 512,
@@ -436,13 +430,13 @@ pub fn new_full_base(
 		// been tested extensively yet and having most nodes in a network run it
 		// could lead to finality stalls.
 		let grandpa_config = sc_finality_grandpa::GrandpaParams {
-			config: grandpa_config,
+			config,
 			link: grandpa_link,
-			network,
+			network: network.clone(),
+			telemetry: telemetry.as_ref().map(|x| x.handle()),
 			voting_rule: sc_finality_grandpa::VotingRulesBuilder::default().build(),
 			prometheus_registry,
-			shared_voter_state: SharedVoterState::empty(),
-			telemetry: telemetry.as_ref().map(|x| x.handle()),
+			shared_voter_state,
 		};
 
 		// the GRANDPA voter task is considered infallible, i.e.
